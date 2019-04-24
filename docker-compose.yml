@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  service_helloworld_web:
+    image: sazzabi/web
+    container_name: service_helloworld_web
+    env_file:
+      - ./service.service-1/.env
+    volumes:
+      - ./service.service-1:${PROJECT_DIR}
+    working_dir: ${PROJECT_DIR}
+    ports:
+      - 8001:80
+    depends_on:
+      - service_helloworld_php
+      - project_db
+    networks:
+      - microservices-network
+
+  service_helloworld_php:
+    image: sazzabi/php
+    container_name: service_helloworld_php
+    env_file:
+      - ./service.service-1/.env
+    volumes:
+      - ./service.service-1:${PROJECT_DIR}
+    working_dir: ${PROJECT_DIR}
+    networks:
+      - microservices-network
+
+  project_db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: project_db
+    restart: always
+    ports:
+      - 3306:3306
+    env_file:
+      - .env
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - microservices-network
+
+
+networks:
+  microservices-network:
+    external: true
